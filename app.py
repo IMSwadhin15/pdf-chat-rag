@@ -1,6 +1,9 @@
 import pymupdf
+import ollama
 
+MODEL = "llama3.2:1b"
 
+# this reads the pdf file
 def read_pdf(doc_path):
     '''
         This function takes the document as argument. Open it and extract text from each page. Keep the extracted texts in a list called 'text' with index reference to each page numbers. 
@@ -14,7 +17,7 @@ def read_pdf(doc_path):
     # return a list of strs, where each index store text of corresponding page
     return text
 
-
+# this chunk the text
 def make_chunk(pages, chunk_size=150):
     '''
     Splits the extracted text of each page into smaller chunks of words.
@@ -46,18 +49,48 @@ def make_chunk(pages, chunk_size=150):
             })
     return chunks
 
+# this asks the llm
+def ask_llm(prompt):
+    response = ollama.chat(
+        model=MODEL,
+        messages=[{"role": "user", "content":prompt}]
+    )
+    return response["message"]["content"]
 
+# make prompt
+def make_prompt(text):
+    prompt = f"""Read the text below and write in bullet points with exact 15 words summarising it.
 
-ans_list = read_pdf("testpdf.pdf")
-chunks = make_chunk(ans_list)
-print(len(chunks))
-# print(chunks)
-# print(chunks[0]['page_no'])
-# print(chunks[0]['text'])
-# print(chunks[4]['page_no'])
-# print(chunks[4]['text'])
-# print(len(chunks[0]['text'].split()))
+Rules:
+- Use only the text below. Do not add outside knowledge.
+- Do not write an introduction or a conclusion.
 
-# print(ans_list)
+Text:
+{text}
+"""
+    return prompt
 
-# print(type(ans_list[1]))
+# this combines the chunks to a single string with separator
+def combine_chunks(chunks):
+    joined_chunks = []
+    for chunk in chunks:
+        joined_chunks.append(chunk['text'])
+
+    # join the text with new line 
+    joined_text = "\n\n".join(joined_chunks)
+
+    # this is a big string with all texts
+    return joined_text
+
+# summarise text
+def summarise_text(text):
+    prompt = make_prompt(text)
+    return ask_llm(prompt)
+
+# this makes the later codes execute, when this file run directly and not when it imported
+if __name__ == "__main__":
+    ans_list = read_pdf("testpdf.pdf")
+    chunks = make_chunk(ans_list)
+    joined_text = combine_chunks(chunks)
+    print(len(joined_text.split()))
+    print(summarise_text(joined_text))
