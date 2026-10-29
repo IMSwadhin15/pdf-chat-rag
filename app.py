@@ -1,7 +1,14 @@
+from functools import partial
 import pymupdf
 import ollama
 
 MODEL = "llama3.2:1b"
+SHORT_SUMMARY_PROMPT = "Summarise the text in 3 bullet points, each under 15 words."
+LONG_SUMMARY_PROMPT = (
+    "These are partial summaries of consecutive sections of one document. "
+    "Combine them into 6 to 8 bullet points that cover the whole document, "
+    "each under 20 words."
+)
 
 # this reads the pdf file
 def read_pdf(doc_path):
@@ -47,6 +54,8 @@ def make_chunk(pages, chunk_size=150):
                 "page_no" : page_no,
                 "text"   : " ".join(chunk)
             })
+
+    # list with dicts having text chunk and corresponding page number
     return chunks
 
 # this asks the llm
@@ -58,8 +67,8 @@ def ask_llm(prompt):
     return response["message"]["content"]
 
 # make prompt
-def make_prompt(text):
-    prompt = f"""Read the text below and write in bullet points with exact 15 words summarising it.
+def make_prompt(text, instruction):
+    prompt = f"""{instruction}
 
 Rules:
 - Use only the text below. Do not add outside knowledge.
@@ -83,14 +92,33 @@ def combine_chunks(chunks):
     return joined_text
 
 # summarise text
-def summarise_text(text):
-    prompt = make_prompt(text)
+def summariser_text(text, instruction = SHORT_SUMMARY_PROMPT):
+    prompt = make_prompt(text, instruction)
     return ask_llm(prompt)
+
+# summeriser for big texts
+def summarise_pdf(chunks, grp_size = 5):
+    partial_summary = []
+
+    # group texts form chunks in grp_size, convert them to one string, get their summery and append them to partial summery
+    for i in range(0, len(chunks), grp_size):
+        temp_chunk = chunks[i : i+ grp_size]
+
+        temp_text = combine_chunks(temp_chunk)
+        summary = summariser_text(temp_text)
+        partial_summary.append(summary)
+    
+    # combine all the partial summary string to one string and pass it to the summeriser
+    final_summary = summariser_text("\n\n".join(partial_summary), LONG_SUMMARY_PROMPT)
+
+    # return final summary
+    return final_summary
+
 
 # this makes the later codes execute, when this file run directly and not when it imported
 if __name__ == "__main__":
-    ans_list = read_pdf("testpdf.pdf")
+    ans_list = read_pdf("big_report.pdf")
     chunks = make_chunk(ans_list)
-    joined_text = combine_chunks(chunks)
-    print(len(joined_text.split()))
-    print(summarise_text(joined_text))
+    # joined_text = combine_chunks(chunks)
+    # print(len(joined_text.split()))
+    print(summarise_pdf(chunks, grp_size = 5))

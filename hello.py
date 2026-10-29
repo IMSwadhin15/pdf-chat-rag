@@ -54,19 +54,26 @@ import ollama
 # print(type(ans_list[1]))
 # print(ask_llm("Hello!"))
 
-lines = [
-    {"lineno": "l1", "text": "The library opened in 1962 and has served the community for over six decades."},
-    {"lineno": "l2", "text": "It currently has 24 computers available for public use."},
-    {"lineno": "l3", "text": "A team of 9 dedicated staff members manages the daily operations."},
-    {"lineno": "l4", "text": "The library offers free internet access and a wide collection of books."},
-    {"lineno": "l5", "text": "It also hosts weekly reading events for children and adults."},
-]
+# lines = [
+#     {"lineno": "l1", "text": "The library opened in 1962 and has served the community for over six decades."},
+#     {"lineno": "l2", "text": "It currently has 24 computers available for public use."},
+#     {"lineno": "l3", "text": "A team of 9 dedicated staff members manages the daily operations."},
+#     {"lineno": "l4", "text": "The library offers free internet access and a wide collection of books."},
+#     {"lineno": "l5", "text": "It also hosts weekly reading events for children and adults."},
+# ]
 
-join_line = []
-for line in lines:
-    join_line.append(line["text"])
+# join_line = []
+# for line in lines:
+#     join_line.append(line["text"])
 
-print(join_line)
+# print(join_line)
 
-new = "\n\n".join(join_line)
-print(type(new))
+# new = "\n\n".join(join_line)
+# print(type(new))
+
+lst = []
+lst.append("hgy")
+lst.append("gjk")
+
+temp = "\n\n".join(lst)
+print(temp)
