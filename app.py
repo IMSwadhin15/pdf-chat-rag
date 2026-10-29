@@ -1,6 +1,6 @@
-from functools import partial
 import pymupdf
 import ollama
+import math
 
 MODEL = "llama3.2:1b"
 SHORT_SUMMARY_PROMPT = "Summarise the text in 3 bullet points, each under 15 words."
@@ -92,24 +92,30 @@ def combine_chunks(chunks):
     return joined_text
 
 # summarise text
-def summariser_text(text, instruction = SHORT_SUMMARY_PROMPT):
+def summarise_text(text, instruction = SHORT_SUMMARY_PROMPT):
     prompt = make_prompt(text, instruction)
     return ask_llm(prompt)
 
 # summeriser for big texts
 def summarise_pdf(chunks, grp_size = 5):
-    partial_summary = []
+    if not chunks:
+        return "No text found in this PDF. It may be a scanned document."
 
+    partial_summary = []
+    total_groups = math.ceil(len(chunks) / grp_size)
+    
     # group texts form chunks in grp_size, convert them to one string, get their summery and append them to partial summery
     for i in range(0, len(chunks), grp_size):
+
+        print(f"Summarising group {i // grp_size + 1} of {total_groups}...")
         temp_chunk = chunks[i : i+ grp_size]
 
         temp_text = combine_chunks(temp_chunk)
-        summary = summariser_text(temp_text)
+        summary = summarise_text(temp_text)
         partial_summary.append(summary)
     
     # combine all the partial summary string to one string and pass it to the summeriser
-    final_summary = summariser_text("\n\n".join(partial_summary), LONG_SUMMARY_PROMPT)
+    final_summary = summarise_text("\n\n".join(partial_summary), LONG_SUMMARY_PROMPT)
 
     # return final summary
     return final_summary
