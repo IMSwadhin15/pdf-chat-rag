@@ -71,9 +71,74 @@ import ollama
 # new = "\n\n".join(join_line)
 # print(type(new))
 
-lst = []
-lst.append("hgy")
-lst.append("gjk")
+# import numpy as np
 
-temp = "\n\n".join(lst)
-print(temp)
+# def cosine(a, b):
+#     a, b = np.array(a), np.array(b)
+#     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+# print(cosine([1, 0], [1, 0]))
+# print(cosine([1, 0], [0, 1]))
+# print(cosine([1, 1], [1, 0]))
+
+import ollama
+import numpy as np
+
+# texts = ["I love libraries", "Books are great", "The car is red"]
+# resp = ollama.embed(model="nomic-embed-text", input=texts)
+# vectors = resp["embeddings"]
+
+# print(len(vectors), len(vectors[0]))   # how many vectors, and how long is each
+
+
+# str = "What is Red"
+# resp_str = ollama.embed(model="nomic-embed-text", input=str)
+# resp_vec = resp_str["embeddings"]
+# print(len(resp_vec[0]))
+
+# def cosine(a, b):
+#     a, b = np.array(a), np.array(b)
+#     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+# print(cosine(vectors[0], resp_vec[0]))
+# print(cosine(vectors[1], resp_vec[0]))
+# print(cosine(vectors[2], resp_vec[0]))
+
+texts = [
+    "I love libraries",
+    "Books are great",
+    "The car is red",
+    "Reading helps improve vocabulary and focus",
+    "Public libraries provide free access to knowledge",
+    "She drove her blue sedan down the highway",
+    "Electric vehicles are becoming more popular",
+    "The chef prepared a delicious pasta dish",
+    "Artificial intelligence is transforming technology",
+    "The sun rises in the east every morning",
+]
+
+batch_size = 2
+def embed_text(texts):
+    vectors = []
+
+    for i in range(0, len(texts), batch_size):
+        to_the_model = texts[i : i + batch_size]
+        result = ollama.embed(model="nomic-embed-text", input=to_the_model)
+        partial_vectors = result['embeddings'] # 2d array
+        vectors.extend(partial_vectors)
+    return vectors
+
+vec = embed_text(["hello"]* 70)
+print(len(vec))
+print(len(vec[0]), len(vec[1]))
+# vec2 = embed_text(texts[:3])
+# print(len(vec2))
+
+# vec1 = [
+#     [1,2,3],
+#     [4,5,6],
+#     [7,8,9]
+# ]
+# vec = [[10,11,12],[13,14,15],[16,17,18]]
+# vec1.extend(vec)
+# print(vec1)

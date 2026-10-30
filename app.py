@@ -3,6 +3,8 @@ import ollama
 import math
 
 MODEL = "llama3.2:1b"
+EMBED_MODEL = "nomic-embed-text"
+BATCH = 32                                          # string chunk to pass for embedding
 SHORT_SUMMARY_PROMPT = "Summarise the text in 3 bullet points, each under 15 words."
 LONG_SUMMARY_PROMPT = (
     "These are partial summaries of consecutive sections of one document. "
@@ -65,6 +67,17 @@ def ask_llm(prompt):
         messages=[{"role": "user", "content":prompt}]
     )
     return response["message"]["content"]
+
+# embed given string list to vectors. each string will get a vector
+def embed_text(texts):
+    vectors = []
+
+    for i in range(0, len(texts), BATCH):
+        to_the_model = texts[i : i + BATCH]
+        result = ollama.embed(model=EMBED_MODEL, input=to_the_model)
+        partial_vectors = result['embeddings'] # 2d array
+        vectors.extend(partial_vectors)
+    return vectors
 
 # make prompt
 def make_prompt(text, instruction):
