@@ -1,6 +1,8 @@
 import pymupdf
 import ollama
 import math
+import time
+import numpy as np
 
 MODEL = "llama3.2:1b"
 EMBED_MODEL = "nomic-embed-text"
@@ -68,17 +70,6 @@ def ask_llm(prompt):
     )
     return response["message"]["content"]
 
-# embed given string list to vectors. each string will get a vector
-def embed_text(texts):
-    vectors = []
-
-    for i in range(0, len(texts), BATCH):
-        to_the_model = texts[i : i + BATCH]
-        result = ollama.embed(model=EMBED_MODEL, input=to_the_model)
-        partial_vectors = result['embeddings'] # 2d array
-        vectors.extend(partial_vectors)
-    return vectors
-
 # make prompt
 def make_prompt(text, instruction):
     prompt = f"""{instruction}
@@ -133,11 +124,41 @@ def summarise_pdf(chunks, grp_size = 5):
     # return final summary
     return final_summary
 
+# embed given string list to vectors. each string will get a vector
+def embed_text(texts):
+    vectors = []
+
+    for i in range(0, len(texts), BATCH):
+        to_the_model = texts[i : i + BATCH]
+        result = ollama.embed(model=EMBED_MODEL, input=to_the_model)
+        partial_vectors = result['embeddings'] # 2d array
+        vectors.extend(partial_vectors)
+    return vectors
+
+# embed each string in chunks
+def embed_chunks(chunks):
+    if not chunks:
+        return "No text found in this pdf. It may be scanned document."
+    to_embed = []
+
+    for chunk in chunks:
+        to_embed.append(chunk["text"])
+    
+    embed_vec = np.array(embed_text(to_embed))
+    length = np.linalg.norm(embed_vec, axis = 1, keepdims=True)
+    embed_vec_normalised = embed_vec / length
+
+    return embed_vec_normalised
 
 # this makes the later codes execute, when this file run directly and not when it imported
 if __name__ == "__main__":
     ans_list = read_pdf("big_report.pdf")
     chunks = make_chunk(ans_list)
+    start = time.time()
+    vec = embed_chunks(chunks)
     # joined_text = combine_chunks(chunks)
     # print(len(joined_text.split()))
-    print(summarise_pdf(chunks, grp_size = 5))
+    # print(summarise_pdf(chunks, grp_size = 5))
+    print(len(chunks), len(vec), len(vec[0]), vec.shape)
+    print(np.linalg.norm(vec[0]))
+    print(f"Took {time.time() - start:.1f} seconds")

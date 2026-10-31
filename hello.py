@@ -1,5 +1,6 @@
 import pymupdf
 import ollama
+import numpy as np
 
 # MODEL = "llama3.2:1b"
 
@@ -53,6 +54,7 @@ import ollama
 
 # print(type(ans_list[1]))
 # print(ask_llm("Hello!"))
+#-------------------------------------------------------------------------------------------------------------------
 
 # lines = [
 #     {"lineno": "l1", "text": "The library opened in 1962 and has served the community for over six decades."},
@@ -71,7 +73,7 @@ import ollama
 # new = "\n\n".join(join_line)
 # print(type(new))
 
-# import numpy as np
+#-------------------------------------------------------------------------------------------------------------------
 
 # def cosine(a, b):
 #     a, b = np.array(a), np.array(b)
@@ -80,9 +82,6 @@ import ollama
 # print(cosine([1, 0], [1, 0]))
 # print(cosine([1, 0], [0, 1]))
 # print(cosine([1, 1], [1, 0]))
-
-import ollama
-import numpy as np
 
 # texts = ["I love libraries", "Books are great", "The car is red"]
 # resp = ollama.embed(model="nomic-embed-text", input=texts)
@@ -103,34 +102,35 @@ import numpy as np
 # print(cosine(vectors[0], resp_vec[0]))
 # print(cosine(vectors[1], resp_vec[0]))
 # print(cosine(vectors[2], resp_vec[0]))
+#------------------------------------------------------------------------------------------------------------------
 
-texts = [
-    "I love libraries",
-    "Books are great",
-    "The car is red",
-    "Reading helps improve vocabulary and focus",
-    "Public libraries provide free access to knowledge",
-    "She drove her blue sedan down the highway",
-    "Electric vehicles are becoming more popular",
-    "The chef prepared a delicious pasta dish",
-    "Artificial intelligence is transforming technology",
-    "The sun rises in the east every morning",
-]
+# texts = [
+#     "I love libraries",
+#     "Books are great",
+#     "The car is red",
+#     "Reading helps improve vocabulary and focus",
+#     "Public libraries provide free access to knowledge",
+#     "She drove her blue sedan down the highway",
+#     "Electric vehicles are becoming more popular",
+#     "The chef prepared a delicious pasta dish",
+#     "Artificial intelligence is transforming technology",
+#     "The sun rises in the east every morning",
+# ]
 
-batch_size = 2
-def embed_text(texts):
-    vectors = []
+# batch_size = 2
+# def embed_text(texts):
+#     vectors = []
 
-    for i in range(0, len(texts), batch_size):
-        to_the_model = texts[i : i + batch_size]
-        result = ollama.embed(model="nomic-embed-text", input=to_the_model)
-        partial_vectors = result['embeddings'] # 2d array
-        vectors.extend(partial_vectors)
-    return vectors
+#     for i in range(0, len(texts), batch_size):
+#         to_the_model = texts[i : i + batch_size]
+#         result = ollama.embed(model="nomic-embed-text", input=to_the_model)
+#         partial_vectors = result['embeddings'] # 2d array
+#         vectors.extend(partial_vectors)
+#     return vectors
 
-vec = embed_text(["hello"]* 70)
-print(len(vec))
-print(len(vec[0]), len(vec[1]))
+# vec = embed_text(["hello"]* 70)
+# print(len(vec))
+# print(len(vec[0]), len(vec[1]))
 # vec2 = embed_text(texts[:3])
 # print(len(vec2))
 
@@ -142,3 +142,29 @@ print(len(vec[0]), len(vec[1]))
 # vec = [[10,11,12],[13,14,15],[16,17,18]]
 # vec1.extend(vec)
 # print(vec1)
+# --------------------------------------------------------------------------------------------
+
+m = np.array([[3.0, 4.0],
+              [1.0, 0.0]])
+
+lengths = np.linalg.norm(m, axis=1,keepdims = True)
+print(lengths)            # length of each row
+m = m / lengths        # each row divided by its own length
+# print(np.linalg.norm(m / lengths, axis=1))   # should be all 1s
+print(m)
+
+# ---------------------------------------------------------------------------------------------
+
+# lines = [
+#     {"lineno": "l1", "text": "The library opened in 1962 and has served the community for over six decades."},
+#     {"lineno": "l2", "text": "It currently has 24 computers available for public use."},
+#     {"lineno": "l3", "text": "A team of 9 dedicated staff members manages the daily operations."},
+#     {"lineno": "l4", "text": "The library offers free internet access and a wide collection of books."},
+#     {"lineno": "l5", "text": "It also hosts weekly reading events for children and adults."},
+# ]
+
+# new_list = []
+# for line in lines:
+#     new_list.append(line["text"])
+
+# print(new_list)
